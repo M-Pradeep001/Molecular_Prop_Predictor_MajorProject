@@ -107,7 +107,7 @@ export function PredictionPanel({ smiles, result, isLoading, error, onRetry }) {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          <div className="space-y-6">
+          <div className="space-y-2">
             <div className="glass-dark rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">Current Molecule</h3>
@@ -244,29 +244,37 @@ function MolecularSummary({ properties }) {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-xl p-4 dark:bg-white/5 dark:border-white/10">
-      <div className="grid grid-cols-3 gap-2">
-        <div className={`p-2 rounded-lg ${stability.bg} text-center`}>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Stability</p>
-          <p className={`text-sm font-bold ${stability.color}`}>{stability.level}</p>
+      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">Molecular Profile</h3>
+      
+      <div className="space-y-2">
+        <div className={`p-2 rounded-lg ${stability.bg} flex items-center gap-2`}>
+          <div className={`text-sm font-medium ${stability.color} min-w-[80px]`}>Stability: {stability.level}</div>
+          <p className="text-xs text-gray-600 dark:text-gray-300">{stability.reason}</p>
         </div>
-        <div className={`p-2 rounded-lg ${reactivity.bg} text-center`}>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Reactivity</p>
-          <p className={`text-sm font-bold ${reactivity.color}`}>{reactivity.level}</p>
+
+        <div className={`p-2 rounded-lg ${reactivity.bg} flex items-center gap-2`}>
+          <div className={`text-sm font-medium ${reactivity.color} min-w-[80px]`}>Reactivity: {reactivity.level}</div>
+          <p className="text-xs text-gray-600 dark:text-gray-300">{reactivity.reason}</p>
         </div>
-        <div className={`p-2 rounded-lg ${polarity.bg} text-center`}>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Polarity</p>
-          <p className={`text-sm font-bold ${polarity.color}`}>{polarity.level}</p>
+
+        <div className={`p-2 rounded-lg ${polarity.bg} flex items-center gap-2`}>
+          <div className={`text-sm font-medium ${polarity.color} min-w-[80px]`}>Polarity: {polarity.level}</div>
+          <p className="text-xs text-gray-600 dark:text-gray-300">{polarity.reason}</p>
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
-        <span className="text-xs text-gray-500 dark:text-gray-400">Uses:</span>
+      <div className="mt-3 pt-3 border-t border-white/10">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Applications:</p>
         <div className="flex flex-wrap gap-1">
-          {applications.slice(0, 2).map((app, i) => (
+          {applications.slice(0, 3).map((app, i) => (
             <span key={i} className="px-2 py-0.5 text-xs bg-blue-500/20 text-blue-400 rounded-full">{app}</span>
           ))}
         </div>
       </div>
+
+      <p className="mt-3 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+        {stability.level} stability, {reactivity.level.toLowerCase()} reactivity, {polarity.level.toLowerCase()}. Best for {applications[0].toLowerCase()}.
+      </p>
     </motion.div>
   );
 }

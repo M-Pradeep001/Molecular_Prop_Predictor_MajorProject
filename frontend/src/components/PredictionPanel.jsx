@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { Maximize2, Minimize2, Info, RotateCcw, ZoomIn, ZoomOut, Atom } from 'lucide-react';
+import { Maximize2, Minimize2, Info, RotateCcw, ZoomIn, ZoomOut, Atom, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { useTheme } from '../hooks/useTheme.jsx';
+import { analyzeMolecularBehavior } from '../utils/molecularAnalysis';
 import api from '../services/api';
 
 let $3Dmol = null;
@@ -8,6 +10,7 @@ let $3Dmol = null;
 export function PredictionPanel({ smiles, result, isLoading, error, onRetry }) {
   const viewerRef = useRef(null);
   const containerRef = useRef(null);
+  const { isDark } = useTheme();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [viewerStyle, setViewerStyle] = useState('stick');
   const [viewerLoading, setViewerLoading] = useState(false);
@@ -20,7 +23,7 @@ export function PredictionPanel({ smiles, result, isLoading, error, onRetry }) {
         try {
           const module = await import('3dmol');
           $3Dmol = module.default || module;
-        } catch (err) {
+        } catch {
           setViewerError('Failed to load 3D viewer library');
         }
       }
@@ -29,58 +32,41 @@ export function PredictionPanel({ smiles, result, isLoading, error, onRetry }) {
   }, []);
 
   useEffect(() => {
-    if (!smiles) {
-      setMoleculeData(null);
-      return;
-    }
-
+    if (!smiles) { setMoleculeData(null); return; }
     const fetchMoleculeData = async () => {
       setViewerLoading(true);
       setViewerError(null);
-      
       try {
         const response = await api.post('/molecule/3d', { smiles });
         setMoleculeData(response.data);
-      } catch (err) {
+      } catch {
         setViewerError('Failed to load 3D structure');
       } finally {
         setViewerLoading(false);
       }
     };
-
     fetchMoleculeData();
   }, [smiles]);
 
   useEffect(() => {
     if (!moleculeData || !containerRef.current || !$3Dmol) return;
-
     const timer = setTimeout(() => {
       try {
         const container = containerRef.current;
         container.innerHTML = '';
-
-        viewerRef.current = $3Dmol.createViewer(container, { 
-          backgroundColor: '#1e293b'
-        });
-
-        if (!moleculeData.atoms || moleculeData.atoms.length === 0) {
-          throw new Error('No atoms in molecule data');
-        }
-
-        let pdbData = 'REMARK   1 Molecule from SMILES\nCOMPND    MOL_ID: 1;\n';
-        
+        const bgColor = isDark ? '#111113' : '#ffffff';
+        viewerRef.current = $3Dmol.createViewer(container, { backgroundColor: bgColor });
+        if (!moleculeData.atoms || moleculeData.atoms.length === 0) throw new Error('No atoms');
+        let pdbData = 'REMARK   1 Molecule\n';
         moleculeData.atoms.forEach((atom, i) => {
           pdbData += `ATOM  ${(i+1).toString().padStart(5)} ${atom.elem.padEnd(4)} MOL A   1    ${atom.x.toFixed(3).padStart(8)}${atom.y.toFixed(3).padStart(8)}${atom.z.toFixed(3).padStart(8)}  1.00  0.00          ${atom.elem.padEnd(2)}\n`;
         });
-        
         if (moleculeData.bonds) {
           moleculeData.bonds.forEach(([i, j]) => {
             pdbData += `CONECT${(i+1).toString().padStart(5)}${(j+1).toString().padStart(5)}\n`;
           });
         }
-        
         pdbData += 'END\n';
-
         viewerRef.current.addModel(pdbData, 'pdb');
         viewerRef.current.setStyle({}, { [viewerStyle]: { colorscheme: 'Jmol' } });
         viewerRef.current.zoomTo();
@@ -89,118 +75,147 @@ export function PredictionPanel({ smiles, result, isLoading, error, onRetry }) {
         setViewerError('Failed to render 3D: ' + err.message);
       }
     }, 100);
-
-    return () => {
-      clearTimeout(timer);
-      if (viewerRef.current) {
-        viewerRef.current.clear();
-      }
-    };
-  }, [moleculeData, viewerStyle]);
+    return () => { clearTimeout(timer); if (viewerRef.current) viewerRef.current.clear(); };
+  }, [moleculeData, viewerStyle, isDark]);
 
   return (
-    <section id="predict" className="py-20 bg-gray-50 dark:bg-navy-900">
+    <section id="predict" className="py-20 bg-white dark:bg-zinc-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">Molecular Analysis</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">Real-time 3D visualization and quantum property prediction</p>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-10"
+        >
+          <h2 className="section-heading">Molecular Analysis</h2>
+          <p className="section-subheading">Real-time 3D visualization and quantum property prediction</p>
         </motion.div>
 
+<<<<<<< HEAD
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="space-y-6">
             <div className="glass-dark rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">Current Molecule</h3>
                 <span className="px-3 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full">SMILES</span>
+=======
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Left panel */}
+          <div className="space-y-4">
+            {/* SMILES display */}
+            <div className="card p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-zinc-900 dark:text-white">Current Molecule</span>
+                <span className="badge bg-brand-50 dark:bg-brand-600/10 border border-brand-200 dark:border-brand-600/30 text-brand-700 dark:text-brand-400">SMILES</span>
+>>>>>>> fba12e7 (Updated UI: Modified the coloring and layout, enhanced the dark theme appealing)
               </div>
-              <div className="bg-navy-900/50 rounded-xl p-4 font-mono text-sm text-gray-300 break-all">
-                {smiles || 'No molecule selected'}
+              <div className="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3 font-mono text-xs text-zinc-600 dark:text-zinc-400 break-all min-h-[2.5rem]">
+                {smiles || <span className="text-zinc-400 dark:text-zinc-600">No molecule selected</span>}
               </div>
             </div>
 
-            <div className="glass rounded-2xl p-6 dark:bg-white/5 dark:border-white/10">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Prediction Status</h3>
-              
+            {/* Prediction status */}
+            <div className="card p-5">
+              <span className="text-sm font-semibold text-zinc-900 dark:text-white block mb-4">Status</span>
               {isLoading ? (
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full border-4 border-blue-500/30 border-t-blue-500 animate-spin" />
+                <div className="flex items-center gap-3 text-zinc-600 dark:text-zinc-400">
+                  <Loader2 className="w-5 h-5 animate-spin text-brand-500" />
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">Running EGNN Model...</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Processing molecular graph</p>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-white">Running EGNN model…</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">Processing molecular graph</p>
                   </div>
                 </div>
               ) : error ? (
-                <div className="flex items-start gap-3 text-red-600 dark:text-red-400">
-                  <Info className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Prediction Failed</p>
-                    <p className="text-sm">{error}</p>
-                    <button onClick={onRetry} className="mt-3 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg text-sm font-medium transition-colors">Try Again</button>
+                    <p className="text-sm font-medium text-red-600 dark:text-red-400">Prediction failed</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">{error}</p>
+                    <button
+                      onClick={onRetry}
+                      className="mt-3 text-xs font-medium text-brand-600 dark:text-brand-400 hover:underline"
+                    >
+                      Try again →
+                    </button>
                   </div>
                 </div>
               ) : result ? (
-                <div className="flex items-center gap-3 text-green-600 dark:text-green-400">
-                  <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-500" />
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">Prediction Complete</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">5 properties calculated</p>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-white">Prediction complete</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">5 properties calculated</p>
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-500 dark:text-gray-400">Enter a SMILES string to begin analysis</p>
+                <p className="text-sm text-zinc-400 dark:text-zinc-500">Enter a SMILES string to begin analysis</p>
               )}
             </div>
 
+            {/* Molecular summary */}
             {result && <MolecularSummary properties={result.properties} />}
           </div>
 
-          <motion.div layout className={`glass-dark rounded-2xl overflow-hidden ${isFullscreen ? 'fixed inset-4 z-50' : 'h-[500px]'}`}>
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <Atom className="w-5 h-5" /> 3D Molecular Viewer
-              </h3>
-              <div className="flex items-center gap-2">
-                <select value={viewerStyle} onChange={(e) => setViewerStyle(e.target.value)} className="px-3 py-1.5 bg-navy-900 border border-white/20 rounded-lg text-sm text-white outline-none focus:border-blue-400">
-                  <option value="stick" className="bg-navy-800">Stick</option>
-                  <option value="sphere" className="bg-navy-800">Sphere</option>
-                  <option value="line" className="bg-navy-800">Line</option>
+          {/* 3D Viewer */}
+          <motion.div
+            layout
+            className={`card overflow-hidden flex flex-col ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}
+          >
+            {/* Viewer header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0">
+              <span className="text-sm font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
+                <Atom className="w-4 h-4 text-brand-500" />
+                3D Viewer
+              </span>
+              <div className="flex items-center gap-1">
+                <select
+                  value={viewerStyle}
+                  onChange={(e) => setViewerStyle(e.target.value)}
+                  className="px-2 py-1 text-xs rounded-md border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 outline-none focus:ring-1 focus:ring-brand-500"
+                >
+                  <option value="stick">Stick</option>
+                  <option value="sphere">Sphere</option>
+                  <option value="line">Line</option>
                 </select>
-                <button onClick={() => viewerRef.current?.zoom(0.8)} className="p-2 rounded-lg hover:bg-white/10"><ZoomIn className="w-4 h-4 text-white" /></button>
-                <button onClick={() => viewerRef.current?.zoom(1.2)} className="p-2 rounded-lg hover:bg-white/10"><ZoomOut className="w-4 h-4 text-white" /></button>
-                <button onClick={() => { viewerRef.current?.rotate(90); viewerRef.current?.render(); }} className="p-2 rounded-lg hover:bg-white/10"><RotateCcw className="w-4 h-4 text-white" /></button>
-                <button onClick={() => setIsFullscreen(!isFullscreen)} className="p-2 rounded-lg hover:bg-white/10">
-                  {isFullscreen ? <Minimize2 className="w-4 h-4 text-white" /> : <Maximize2 className="w-4 h-4 text-white" />}
-                </button>
+                {[
+                  { action: () => viewerRef.current?.zoom(1.2), icon: <ZoomIn className="w-3.5 h-3.5" /> },
+                  { action: () => viewerRef.current?.zoom(0.8), icon: <ZoomOut className="w-3.5 h-3.5" /> },
+                  { action: () => { viewerRef.current?.rotate(90); viewerRef.current?.render(); }, icon: <RotateCcw className="w-3.5 h-3.5" /> },
+                  { action: () => setIsFullscreen(!isFullscreen), icon: isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" /> },
+                ].map((btn, i) => (
+                  <button key={i} onClick={btn.action} className="p-1.5 rounded-md text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                    {btn.icon}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div ref={containerRef} className="relative w-full h-full bg-gradient-to-br from-navy-900 to-navy-800" style={{ minHeight: isFullscreen ? 'calc(100vh - 200px)' : '400px' }}>
+            {/* Viewer canvas */}
+            <div
+              ref={containerRef}
+              className={`relative flex-1 ${isDark ? 'bg-[#111113]' : 'bg-white'}`}
+              style={{ minHeight: isFullscreen ? 'calc(100vh - 160px)' : '420px' }}
+            >
               {!smiles && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                  <Atom className="w-12 h-12 mb-4 opacity-50" />
-                  <p className="text-lg font-medium">No molecule to display</p>
-                  <p className="text-sm opacity-70">Enter a SMILES string above</p>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <Atom className={`w-10 h-10 mb-3 opacity-40 ${isDark ? 'text-zinc-600' : 'text-zinc-300'}`} />
+                  <p className={`text-sm font-medium ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>No molecule to display</p>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>Enter a SMILES string above</p>
                 </div>
               )}
               {viewerLoading && smiles && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                  <div className="w-12 h-12 rounded-full border-4 border-blue-500/30 border-t-blue-500 animate-spin mb-4" />
-                  <p className="text-sm">Loading 3D structure...</p>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <Loader2 className="w-8 h-8 text-brand-400 animate-spin mb-2" />
+                  <p className="text-xs text-slate-400">Loading 3D structure…</p>
                 </div>
               )}
               {viewerError && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-red-400">
-                  <Info className="w-12 h-12 mb-4 opacity-50" />
-                  <p className="text-sm">{viewerError}</p>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <Info className="w-8 h-8 mb-2 text-red-400 opacity-50" />
+                  <p className="text-xs text-red-400">{viewerError}</p>
                 </div>
               )}
             </div>
-
-            {isFullscreen && <button onClick={() => setIsFullscreen(false)} className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-xl"><Minimize2 className="w-6 h-6 text-white" /></button>}
           </motion.div>
         </div>
       </div>
@@ -209,40 +224,10 @@ export function PredictionPanel({ smiles, result, isLoading, error, onRetry }) {
 }
 
 function MolecularSummary({ properties }) {
-  const { homo, lumo, gap, dipole, polar } = properties || {};
-
-  // Classify based on HOMO-LUMO gap
-  const getStability = () => {
-    if (gap > 6) return { level: 'High', reason: 'Large energy gap makes electron transfer difficult', color: 'text-green-400', bg: 'bg-green-500/10' };
-    if (gap > 3) return { level: 'Medium', reason: 'Moderate gap allows some reactivity', color: 'text-yellow-400', bg: 'bg-yellow-500/10' };
-    return { level: 'Low', reason: 'Small gap enables easy electron excitation', color: 'text-red-400', bg: 'bg-red-500/10' };
-  };
-
-  const getReactivity = () => {
-    if (gap < 3) return { level: 'High', reason: 'Electrons easily excited for reactions', color: 'text-red-400', bg: 'bg-red-500/10' };
-    if (gap < 6) return { level: 'Medium', reason: 'Balanced reactivity profile', color: 'text-yellow-400', bg: 'bg-yellow-500/10' };
-    return { level: 'Low', reason: 'Stable, resists chemical changes', color: 'text-green-400', bg: 'bg-green-500/10' };
-  };
-
-  const getPolarity = () => {
-    const d = dipole || 0;
-    if (d < 1) return { level: 'Non-polar', reason: 'Minimal charge separation across molecule', color: 'text-blue-400', bg: 'bg-blue-500/10' };
-    if (d < 3) return { level: 'Weakly polar', reason: 'Slight uneven charge distribution', color: 'text-cyan-400', bg: 'bg-cyan-500/10' };
-    return { level: 'Polar', reason: 'Significant positive/negative charge separation', color: 'text-orange-400', bg: 'bg-orange-500/10' };
-  };
-
-  const stability = getStability();
-  const reactivity = getReactivity();
-  const polarity = getPolarity();
-
-  const applications = [];
-  if (gap > 5) applications.push('Insulators / Dielectrics');
-  if (gap < 3) applications.push('Conductive materials');
-  if (dipole > 2) applications.push('Solvents / Drug delivery');
-  if (dipole < 1 && gap > 6) applications.push('Organic electronics');
-  if (applications.length === 0) applications.push('General chemical synthesis');
+  const { summary, behaviors, tags, applications } = analyzeMolecularBehavior(properties);
 
   return (
+<<<<<<< HEAD
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-xl p-4 dark:bg-white/5 dark:border-white/10">
       <div className="grid grid-cols-3 gap-2">
         <div className={`p-2 rounded-lg ${stability.bg} text-center`}>
@@ -267,6 +252,55 @@ function MolecularSummary({ properties }) {
           ))}
         </div>
       </div>
+=======
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="card p-5 space-y-6">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Molecular Behavior Profile</span>
+        <div className="flex gap-1.5">
+          {tags.slice(0, 2).map((tag) => (
+            <span key={tag} className="px-2 py-0.5 text-[10px] font-bold uppercase rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* AI Summary */}
+      <div className="relative group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-brand-500/10 to-indigo-500/10 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-500" />
+        <p className="relative text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium italic">
+          "{summary}"
+        </p>
+      </div>
+
+      {/* Behavioral Insights */}
+      <div className="grid gap-3">
+        <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">Scientific Insights</h4>
+        <div className="space-y-2">
+          {behaviors.map((b, i) => (
+            <div key={i} className="flex gap-3 items-start">
+              <div className="w-1 h-1 rounded-full bg-brand-500 mt-2 flex-shrink-0" />
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">{b}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Potential Applications */}
+      <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
+        <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight mb-3">Predicted Applications</h4>
+        <div className="flex flex-wrap gap-2">
+          {applications.map((app) => (
+            <span
+              key={app}
+              className="px-3 py-1 text-xs font-semibold rounded-full bg-brand-50 dark:bg-brand-600/10 border border-brand-200 dark:border-brand-600/30 text-brand-700 dark:text-brand-400"
+            >
+              {app}
+            </span>
+          ))}
+        </div>
+      </div>
+>>>>>>> fba12e7 (Updated UI: Modified the coloring and layout, enhanced the dark theme appealing)
     </motion.div>
   );
 }

@@ -1,26 +1,36 @@
-# MolPredict — Molecular Property Predictor
+# Molecular Property Transformers: A Framework for Chemically-Informed Model Training
 
-> **College Major Project** | Deep Learning–based prediction of quantum-chemical molecular properties using E(n)-Equivariant Graph Neural Networks (EGNN).
+> **Advanced Molecular Intelligence** | E(3)-Equivariant Graph Neural Networks for Quantum-Chemical Property Prediction. Trained on the QM9 Dataset.
 
 ---
 
 ## 📌 Overview
 
-**MolPredict** is a full-stack web application that predicts key quantum-chemical properties of molecules directly from their **SMILES** (Simplified Molecular-Input Line-Entry System) string. It combines a **PyTorch Geometric EGNN backend** with a **React frontend featuring interactive 3D molecular visualization**.
+**Molecular Property Transformers** is a state-of-the-art full-stack platform designed to predict and analyze quantum-chemical properties of organic molecules. By leveraging **E(3)-Equivariant Graph Neural Networks (EGNN)**, the system achieves high-precision predictions of electronic and polar properties directly from **SMILES** input, while providing a stunning, theme-aware **3D molecular visualization** interface.
 
-The models are trained on the **QM9 dataset** — a benchmark dataset of ~134,000 small organic molecules with quantum-chemical properties computed via DFT (Density Functional Theory).
+The engine is backed by a suite of models trained on the **QM9 dataset** (~134,000 molecules), ensuring a robust foundation in chemical physics and quantum mechanics.
 
 ---
 
 ## 🔬 Predicted Properties
 
-| Property | Symbol | Unit | Description |
+| Property | Symbol | Unit | Scientific Interpretation |
 |---|---|---|---|
-| HOMO Energy | HOMO | eV | Highest Occupied Molecular Orbital energy |
-| LUMO Energy | LUMO | eV | Lowest Unoccupied Molecular Orbital energy |
-| HOMO-LUMO Gap | Gap | eV | Electronic gap (reactivity indicator) |
-| Dipole Moment | μ | Debye | Measure of molecular polarity |
-| Polarizability | α | a.u. | Response of electron cloud to electric field |
+| HOMO Energy | HOMO | eV | Highest Occupied Molecular Orbital (Electron Donor) |
+| LUMO Energy | LUMO | eV | Lowest Unoccupied Molecular Orbital (Electron Acceptor) |
+| HOMO-LUMO Gap | Gap | eV | Electronic stability and chemical reactivity barrier |
+| Dipole Moment | μ | Debye | Permanent charge separation and polarity |
+| Polarizability | α | a.u. | Deformability of the electronic cloud |
+
+---
+
+## 🧬 AI Molecular Behavior Engine
+
+Going beyond raw numbers, the system features a **Molecular Behavior Profile** engine that performs multi-property reasoning to provide a human-readable scientific analysis:
+
+- **AI-Driven Summary**: Generates dynamic paragraphs explaining the molecule's core electronic nature.
+- **Behavioral Tags**: Instant classification into categories like *Ultra-Stable*, *Highly Reactive*, or *NLO Active*.
+- **Strategic Applications**: Predicts real-world use cases (e.g., *OLED Active Layer*, *Dielectric Packaging*) based on quantum predictions.
 
 ---
 
@@ -173,16 +183,16 @@ curl -X POST http://localhost:5000/predict/all \
 ## 💻 Frontend Features
 
 | Feature | Description |
-|---|---|
-| **SMILES Input** | Enter any valid SMILES string with real-time validation |
-| **3D Molecular Viewer** | Interactive 3D visualization powered by **3Dmol.js** |
-| **Property Cards** | Animated result cards for all 5 predicted properties |
-| **Results Dashboard** | Recharts-based visualization of predictions |
-| **Model Explainer** | In-app visual explanation of the EGNN architecture |
-| **Performance Dashboard** | MAE and R² scores per property |
-| **Dataset Section** | Overview of the QM9 training dataset |
-| **Dark/Light Theme** | Toggle between themes |
-| **Backend Status** | Live indicator showing API connectivity |
+|---|---|---|
+| **SMILES Input** | Real-time validated input for any organic molecule |
+| **3D Molecular Viewer** | Theme-aware interactive 3D visualization (3Dmol.js) |
+| **AI Behavior Profile** | Intelligent scientific interpretation of predicted properties |
+| **SaaS Redesign** | Minimalist Zinc/Indigo design language (2025 standard) |
+| **Results Dashboard** | Premium, high-readability result cards with visual accents |
+| **Model Explainer** | Visual guide to the underlying EGNN architecture |
+| **Performance Metrics** | Real-time MAE and R² charts (Recharts) |
+| **Global Theme Sync** | Seamless Dark/Light mode synchronization |
+| **Backend Connectivity** | Real-time API status monitoring |
 
 ---
 

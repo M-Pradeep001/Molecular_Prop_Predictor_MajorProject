@@ -3,11 +3,11 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { TrendingUp, Target, Award, BarChart3 } from 'lucide-react';
 
 const RMSE_DATA = [
-  { property: 'HOMO', rmse: 0.047, color: '#8b5cf6' },
-  { property: 'LUMO', rmse: 0.046, color: '#3b82f6' },
-  { property: 'Gap', rmse: 0.063, color: '#10b981' },
-  { property: 'Dipole', rmse: 0.297, color: '#f59e0b' },
-  { property: 'Polar', rmse: 0.060, color: '#ec4899' },
+  { property: 'HOMO',   rmse: 0.047, color: '#7c3aed' },
+  { property: 'LUMO',   rmse: 0.046, color: '#2563eb' },
+  { property: 'Gap',    rmse: 0.063, color: '#059669' },
+  { property: 'Dipole', rmse: 0.297, color: '#d97706' },
+  { property: 'Polar',  rmse: 0.060, color: '#db2777' },
 ];
 
 const SCATTER_DATA = [
@@ -22,225 +22,128 @@ const SCATTER_DATA = [
 ];
 
 const METRICS = [
-  {
-    label: 'R² Score',
-    value: '0.90',
-    description: 'Coefficient of determination',
-    icon: <Target className="w-6 h-6" />,
-    color: 'from-green-500 to-emerald-600',
-  },
-  {
-    label: 'Avg RMSE',
-    value: '0.19',
-    unit: 'eV',
-    description: 'Root Mean Square Error',
-    icon: <TrendingUp className="w-6 h-6" />,
-    color: 'from-blue-500 to-cyan-600',
-  },
-  {
-    label: 'MAE',
-    value: '0.14',
-    unit: 'eV',
-    description: 'Mean Absolute Error',
-    icon: <BarChart3 className="w-6 h-6" />,
-    color: 'from-purple-500 to-violet-600',
-  },
-  {
-    label: 'Test Molecules',
-    value: '13K',
-    description: 'Held-out test set size',
-    icon: <Award className="w-6 h-6" />,
-    color: 'from-orange-500 to-amber-600',
-  },
+  { label: 'R² Score',         value: '0.90', unit: '',    description: 'Coefficient of determination', icon: <Target className="w-5 h-5" />,    iconBg: 'bg-green-100 dark:bg-green-900/30',   iconClr: 'text-green-600 dark:text-green-400' },
+  { label: 'Avg RMSE',         value: '0.19', unit: 'eV', description: 'Root Mean Square Error',        icon: <TrendingUp className="w-5 h-5" />, iconBg: 'bg-brand-100 dark:bg-brand-600/20',   iconClr: 'text-brand-600 dark:text-brand-400' },
+  { label: 'MAE',              value: '0.14', unit: 'eV', description: 'Mean Absolute Error',           icon: <BarChart3 className="w-5 h-5" />,  iconBg: 'bg-homo-muted dark:bg-homo-DEFAULT/20', iconClr: 'text-homo-DEFAULT dark:text-homo-light' },
+  { label: 'Test Molecules',   value: '13K',  unit: '',   description: 'Held-out test set size',        icon: <Award className="w-5 h-5" />,      iconBg: 'bg-dipole-muted dark:bg-dipole-DEFAULT/20', iconClr: 'text-dipole-DEFAULT dark:text-dipole-light' },
 ];
 
-function MetricCard({ metric, index }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.1 }}
-      className="glass rounded-2xl p-6 card-hover"
-    >
-      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${metric.color} flex items-center justify-center text-white mb-4`}>
-        {metric.icon}
-      </div>
-      <div className="space-y-1">
-        <p className="text-sm text-gray-500 dark:text-gray-400">{metric.label}</p>
-        <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold text-gray-900 dark:text-white">{metric.value}</span>
-          {metric.unit && (
-            <span className="text-sm text-gray-500">{metric.unit}</span>
-          )}
-        </div>
-        <p className="text-xs text-gray-400">{metric.description}</p>
-      </div>
-    </motion.div>
-  );
-}
+const TOOLTIP_STYLE = {
+  backgroundColor: '#18181b',
+  border: '1px solid #27272a',
+  borderRadius: '8px',
+  color: '#e4e4e7',
+  fontSize: '12px',
+};
 
 export function PerformanceDashboard() {
   return (
-    <section id="performance" className="py-20 bg-gray-50 dark:bg-navy-900">
+    <section id="performance" className="py-20 bg-zinc-50 dark:bg-zinc-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="mb-10"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Model Performance
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            Benchmarked on QM9 dataset holdout set
-          </p>
+          <h2 className="section-heading">Model Performance</h2>
+          <p className="section-subheading">Benchmarked on QM9 holdout set</p>
         </motion.div>
 
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {METRICS.map((metric, index) => (
-            <MetricCard key={metric.label} metric={metric} index={index} />
+        {/* Metrics */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {METRICS.map((m, i) => (
+            <motion.div
+              key={m.label}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.07 }}
+              className="card card-hover p-5"
+            >
+              <div className={`w-9 h-9 rounded-lg ${m.iconBg} ${m.iconClr} flex items-center justify-center mb-3`}>
+                {m.icon}
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">{m.label}</p>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-2xl font-bold text-zinc-900 dark:text-white">{m.value}</span>
+                {m.unit && <span className="text-sm text-zinc-400">{m.unit}</span>}
+              </div>
+              <p className="text-xs text-zinc-400 mt-0.5">{m.description}</p>
+            </motion.div>
           ))}
         </div>
 
         {/* Charts */}
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* RMSE Bar Chart */}
+        <div className="grid lg:grid-cols-2 gap-6">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -12 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="glass rounded-2xl p-6"
+            className="card p-6"
           >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-              RMSE by Property
-            </h3>
-            <div className="h-64">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-1">RMSE by Property</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-5">Lower RMSE = better accuracy</p>
+            <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={RMSE_DATA} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.2)" />
-                  <XAxis 
-                    dataKey="property" 
-                    tick={{ fill: 'currentColor' }}
-                    stroke="currentColor"
-                  />
-                  <YAxis 
-                    tick={{ fill: 'currentColor' }}
-                    stroke="currentColor"
-                    label={{ value: 'RMSE (eV)', angle: -90, position: 'insideLeft' }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      color: 'white'
-                    }}
-                  />
-                  <Bar dataKey="rmse" radius={[8, 8, 0, 0]}>
-                    {RMSE_DATA.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
+                <BarChart data={RMSE_DATA} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(161,161,170,0.2)" vertical={false} />
+                  <XAxis dataKey="property" tick={{ fill: '#71717a', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: '#71717a', fontSize: 12 }} axisLine={false} tickLine={false} label={{ value: 'RMSE', angle: -90, position: 'insideLeft', fill: '#a1a1aa', fontSize: 11 }} />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ fill: 'rgba(161,161,170,0.05)' }} />
+                  <Bar dataKey="rmse" radius={[4, 4, 0, 0]}>
+                    {RMSE_DATA.map((e, i) => <Cell key={i} fill={e.color} fillOpacity={0.85} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">
-              Lower RMSE indicates better prediction accuracy
-            </p>
           </motion.div>
 
-          {/* Scatter Plot */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 12 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="glass rounded-2xl p-6"
+            className="card p-6"
           >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-              Predicted vs Actual (HOMO Energy)
-            </h3>
-            <div className="h-64">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-1">Predicted vs Actual (HOMO)</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-5">Blue line = perfect prediction (y = x)</p>
+            <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(128,128,128,0.2)" />
-                  <XAxis 
-                    type="number" 
-                    dataKey="actual" 
-                    name="Actual" 
-                    domain={[-10, -5]}
-                    tick={{ fill: 'currentColor' }}
-                    stroke="currentColor"
-                    label={{ value: 'Actual (eV)', position: 'bottom' }}
-                  />
-                  <YAxis 
-                    type="number" 
-                    dataKey="predicted" 
-                    name="Predicted" 
-                    domain={[-10, -5]}
-                    tick={{ fill: 'currentColor' }}
-                    stroke="currentColor"
-                    label={{ value: 'Predicted (eV)', angle: -90, position: 'insideLeft' }}
-                  />
-                  <ZAxis type="number" dataKey="count" range={[50, 400]} />
-                  <Tooltip 
-                    cursor={{ strokeDasharray: '3 3' }}
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      color: 'white'
-                    }}
-                  />
-                  <ReferenceLine x={-7.5} stroke="gray" strokeDasharray="3 3" />
-                  <ReferenceLine y={-7.5} stroke="gray" strokeDasharray="3 3" />
-                  <ReferenceLine segment={[{ x: -10, y: -10 }, { x: -5, y: -5 }]} stroke="#3b82f6" strokeWidth={2} />
-                  <Scatter name="Predictions" data={SCATTER_DATA} fill="#3b82f6" />
+                <ScatterChart margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(161,161,170,0.2)" />
+                  <XAxis type="number" dataKey="actual" name="Actual" domain={[-10, -5]} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} label={{ value: 'Actual (eV)', position: 'bottom', fill: '#a1a1aa', fontSize: 11 }} />
+                  <YAxis type="number" dataKey="predicted" name="Predicted" domain={[-10, -5]} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} label={{ value: 'Predicted (eV)', angle: -90, position: 'insideLeft', fill: '#a1a1aa', fontSize: 11 }} />
+                  <ZAxis type="number" dataKey="count" range={[30, 300]} />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} />
+                  <ReferenceLine segment={[{ x: -10, y: -10 }, { x: -5, y: -5 }]} stroke="#4f46e5" strokeWidth={1.5} />
+                  <Scatter data={SCATTER_DATA} fill="#4f46e5" fillOpacity={0.7} />
                 </ScatterChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">
-              Blue line represents perfect prediction (y = x)
-            </p>
           </motion.div>
         </div>
 
-        {/* Performance Summary */}
+        {/* Summary row */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-12 glass rounded-2xl p-6"
+          className="mt-6 card p-6"
         >
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Model Comparison
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 max-w-2xl">
-                Our EGNN model outperforms traditional machine learning approaches 
-                (Random Forest, SVM) and matches state-of-the-art Transformer-based models 
-                while being 10x faster at inference.
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-1">Model Comparison</h3>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-2xl">
+                Our EGNN outperforms traditional ML (Random Forest, SVM) and matches state-of-the-art Transformer-based models — while being 10× faster at inference.
               </p>
             </div>
-            <div className="flex items-center gap-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">SOTA</p>
-                <p className="text-xs text-gray-500">Performance</p>
-              </div>
-              <div className="h-12 w-px bg-gray-300 dark:bg-gray-600" />
-              <div className="text-center">
-                <p className="text-2xl font-bold text-green-500">10x</p>
-                <p className="text-xs text-gray-500">Faster</p>
-              </div>
-              <div className="h-12 w-px bg-gray-300 dark:bg-gray-600" />
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-500">5</p>
-                <p className="text-xs text-gray-500">Properties</p>
-              </div>
+            <div className="flex items-center gap-6 flex-shrink-0">
+              {[['SOTA', 'Performance', 'text-zinc-900 dark:text-white'], ['10×', 'Faster', 'text-green-600 dark:text-green-400'], ['5', 'Properties', 'text-brand-600 dark:text-brand-400']].map(([val, lbl, cls]) => (
+                <div key={lbl} className="text-center">
+                  <p className={`text-2xl font-bold ${cls}`}>{val}</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">{lbl}</p>
+                </div>
+              ))}
             </div>
           </div>
         </motion.div>

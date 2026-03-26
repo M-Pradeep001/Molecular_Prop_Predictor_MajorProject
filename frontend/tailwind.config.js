@@ -8,75 +8,54 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
+        // Brand — single primary color
+        brand: {
+          50:  '#eef2ff',
+          100: '#e0e7ff',
+          200: '#c7d2fe',
+          500: '#6366f1',
+          600: '#4f46e5',
+          700: '#4338ca',
         },
-        secondary: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          500: '#22c55e',
-          600: '#16a34a',
+        // Neutral surface scale (replaces heavy navy)
+        surface: {
+          0:   '#ffffff',
+          1:   '#fafafa',
+          2:   '#f4f4f5',
+          3:   '#e4e4e7',
         },
-        homo: {
-          DEFAULT: '#8b5cf6',
-          light: '#a78bfa',
-          dark: '#7c3aed',
+        'surface-dark': {
+          0:   '#09090b',
+          1:   '#0f0f11',
+          2:   '#18181b',
+          3:   '#27272a',
         },
-        lumo: {
-          DEFAULT: '#3b82f6',
-          light: '#60a5fa',
-          dark: '#2563eb',
-        },
-        gap: {
-          DEFAULT: '#10b981',
-          light: '#34d399',
-          dark: '#059669',
-        },
-        dipole: {
-          DEFAULT: '#f59e0b',
-          light: '#fbbf24',
-          dark: '#d97706',
-        },
-        polar: {
-          DEFAULT: '#ec4899',
-          light: '#f472b6',
-          dark: '#db2777',
-        },
-        navy: {
-          900: '#0f172a',
-          800: '#1e293b',
-          700: '#334155',
-          600: '#475569',
-        },
+        // Property colors — muted, not neon
+        homo:   { DEFAULT: '#7c3aed', light: '#a78bfa', muted: '#ede9fe' },
+        lumo:   { DEFAULT: '#2563eb', light: '#60a5fa', muted: '#dbeafe' },
+        gap:    { DEFAULT: '#059669', light: '#34d399', muted: '#d1fae5' },
+        dipole: { DEFAULT: '#d97706', light: '#fbbf24', muted: '#fef3c7' },
+        polar:  { DEFAULT: '#db2777', light: '#f472b6', muted: '#fce7f3' },
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+      },
+      fontSize: {
+        'display': ['3.5rem', { lineHeight: '1.1', fontWeight: '700', letterSpacing: '-0.02em' }],
+      },
+      boxShadow: {
+        'card':  '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04)',
+        'card-md': '0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05)',
+        'card-hover': '0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05)',
       },
       animation: {
-        'gradient': 'gradient 8s ease infinite',
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'float': 'float 6s ease-in-out infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
+        'fade-up': 'fadeUp 0.45s ease-out forwards',
       },
       keyframes: {
-        gradient: {
-          '0%, 100%': {
-            'background-size': '200% 200%',
-            'background-position': 'left center',
-          },
-          '50%': {
-            'background-size': '200% 200%',
-            'background-position': 'right center',
-          },
-        },
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-20px)' },
-        },
-        glow: {
-          '0%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)' },
-          '100%': { boxShadow: '0 0 40px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.6)' },
+        fadeUp: {
+          from: { opacity: '0', transform: 'translateY(12px)' },
+          to:   { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = '';  // Use Vite proxy (configured in vite.config.js)
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -11,9 +11,13 @@ const api = axios.create({
 });
 
 export async function predictProperties(smiles) {
+  console.log('[API] predictProperties called with:', smiles);
   try {
+    console.log('[API] Making POST request to /predict/all');
     const response = await api.post('/predict/all', { smiles });
+    console.log('[API] Response received:', response);
     const data = response.data;
+    console.log('[API] Response data:', data);
     
     // Transform backend response to frontend format
     const propertyMap = {

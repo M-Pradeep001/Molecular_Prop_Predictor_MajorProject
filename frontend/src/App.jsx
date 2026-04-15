@@ -43,17 +43,21 @@ function App() {
   }, []);
 
   const handlePredict = async (smiles) => {
+    console.log('[App] handlePredict called with:', smiles);
     setLoading(true);
     setError(null);
     setResult(null);
     setCurrentSmiles(smiles);
     try {
+      console.log('[App] Calling predictProperties...');
       const data = await predictProperties(smiles);
+      console.log('[App] predictProperties returned:', data);
       setResult(data);
       setTimeout(() => {
         document.getElementById('predict')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 400);
     } catch (err) {
+      console.error('[App] predictProperties error:', err);
       setError(err.message || 'Failed to predict properties');
     } finally {
       setLoading(false);

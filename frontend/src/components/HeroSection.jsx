@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { ArrowRight, Atom, Zap } from 'lucide-react';
+import { ArrowRight, Atom } from 'lucide-react';
 
 const EXAMPLE_MOLECULES = [
   { name: 'Benzene',  smiles: 'c1ccccc1' },
@@ -15,24 +15,32 @@ export function HeroSection({ onPredict, isLoading }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (smiles.trim()) onPredict(smiles.trim());
+    console.log('[HeroSection] Submit clicked, smiles:', smiles);
+    if (smiles.trim()) {
+      console.log('[HeroSection] Calling onPredict with:', smiles.trim());
+      onPredict(smiles.trim());
+    } else {
+      console.log('[HeroSection] SMILES is empty, not calling onPredict');
+    }
   };
 
   const handleExampleClick = (s) => {
+    console.log('[HeroSection] Example clicked:', s);
     setSmiles(s);
     onPredict(s);
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-zinc-50 dark:bg-[#09090b] pt-14">
-      {/* Subtle dot grid background */}
-      <div className="absolute inset-0 bg-dot-grid opacity-60 dark:opacity-40" />
+    <section className="relative min-h-screen flex pt-14">
+      {/* Left side - Coal dark background with content */}
+      <div className="flex-1 bg-black flex items-start justify-center pt-24">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Subtle dot grid background */}
+          <div className="absolute inset-0 bg-dot-grid opacity-20 pointer-events-none" />
 
-      {/* Soft top gradient fade */}
-      <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-zinc-50 dark:from-[#09090b] to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-zinc-50 dark:from-[#09090b] to-transparent" />
-
-      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Soft gradient overlays */}
+          <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-black to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black to-transparent pointer-events-none" />
 
 
 
@@ -41,10 +49,10 @@ export function HeroSection({ onPredict, isLoading }) {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.08 }}
-          className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-900 dark:text-white mb-4 leading-tight"
+          className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4 leading-tight"
         >
           Predict Molecular{' '}
-          <span className="text-brand-600 dark:text-brand-400">Properties</span>
+          <span className="text-gray-400">Properties</span>
           {' '}Instantly
         </motion.h1>
 
@@ -53,36 +61,12 @@ export function HeroSection({ onPredict, isLoading }) {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.15 }}
-          className="text-base sm:text-lg text-zinc-600 dark:text-zinc-300 max-w-2xl mx-auto mb-2 font-medium"
+          className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-6 font-medium"
         >
           A Framework for Chemically-Informed Model Training
         </motion.p>
 
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.18 }}
-          className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto mb-8"
-        >
-          Predict quantum-chemical properties (HOMO, LUMO, Gap, Dipole, Polarizability)
-          directly from SMILES using our equivariant EGNN architecture.
-        </motion.p>
 
-        {/* Stat pills */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="flex items-center justify-center gap-4 text-xs text-zinc-400 dark:text-zinc-500 mb-10"
-        >
-          <span className="flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-brand-500" /> 5 properties
-          </span>
-          <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-          <span>130K training molecules</span>
-          <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-          <span>QM9 dataset</span>
-        </motion.div>
 
         {/* Input form */}
         <motion.form
@@ -92,10 +76,10 @@ export function HeroSection({ onPredict, isLoading }) {
           onSubmit={handleSubmit}
           className="mb-6"
         >
-          <div className={`flex items-center gap-2 p-1.5 bg-white dark:bg-zinc-900 rounded-xl border transition-all duration-150 shadow-card ${
+          <div className={`flex items-center gap-2 p-1.5 bg-gray-900 rounded-xl border border-gray-600 transition-all duration-150 shadow-card ${
             isFocused
-              ? 'border-brand-500 ring-2 ring-brand-500/20'
-              : 'border-zinc-300 dark:border-zinc-700'
+              ? 'border-gray-400 ring-2 ring-gray-400/20'
+              : 'border-gray-600'
           }`}>
             <input
               type="text"
@@ -104,12 +88,12 @@ export function HeroSection({ onPredict, isLoading }) {
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="Enter SMILES string  (e.g. CCO for ethanol)"
-              className="flex-1 bg-transparent px-3 py-2.5 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 outline-none text-sm font-mono"
+              className="flex-1 bg-transparent px-3 py-2.5 text-gray-200 placeholder-gray-500 outline-none text-sm font-mono"
             />
             <button
               type="submit"
               disabled={isLoading || !smiles.trim()}
-              className="btn-primary flex-shrink-0"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-medium text-sm rounded-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
             >
               {isLoading ? (
                 <>
@@ -133,17 +117,29 @@ export function HeroSection({ onPredict, isLoading }) {
           transition={{ duration: 0.4, delay: 0.3 }}
           className="flex flex-wrap items-center justify-center gap-2"
         >
-          <span className="text-xs text-zinc-400 dark:text-zinc-500">Try:</span>
+          <span className="text-xs text-gray-500">Try:</span>
           {EXAMPLE_MOLECULES.map((mol) => (
             <button
               key={mol.name}
               onClick={() => handleExampleClick(mol.smiles)}
-              className="px-3 py-1 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+              className="px-3 py-1 rounded-full border border-gray-800 bg-gray-900 text-xs font-medium text-gray-400 hover:border-gray-600 hover:text-gray-300 transition-colors"
             >
               {mol.name}
             </button>
           ))}
         </motion.div>
+        </div>
+      </div>
+      
+      {/* Right side - Image panel */}
+      <div className="w-1/3 lg:w-2/5 bg-black relative overflow-hidden">
+        <img 
+          src="/images/tuxpi.com.1776104658 (1).jpg" 
+          alt="Chemistry background" 
+          className="w-full h-full object-cover"
+        />
+        {/* Overlay for better text readability if needed */}
+        <div className="absolute inset-0 bg-black/20" />
       </div>
     </section>
   );
